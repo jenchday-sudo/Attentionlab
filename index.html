@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MindLab — Psychology Paradigms</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f2eb; --surface: #fffdf7; --surface2: #f0ece1;
+  --ink: #1a1814; --ink2: #5a5649; --ink3: #9a9488;
+  --accent: #2d5a3d; --accent2: #4a8c5c; --accent-light: #d6ead9;
+  --warn: #8b3a00; --warn-light: #fde8d4;
+  --blue: #1a4a8a; --blue-light: #ddeaf8;
+  --purple: #4a2d8a; --purple-light: #e8e0f8;
+  --border: rgba(26,24,20,0.12); --border2: rgba(26,24,20,0.06);
+  --radius: 12px; --mono: 'DM Mono', monospace; --serif: 'Fraunces', serif;
+}
+body { font-family: var(--mono); background: var(--bg); color: var(--ink); min-height: 100vh; line-height: 1.6; }
+
+/* HUB */
+#hub { max-width: 920px; margin: 0 auto; padding: 60px 32px 80px; }
+.site-header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 64px; }
+.site-logo { font-family: var(--serif); font-size: 28px; font-weight: 600; color: var(--ink); letter-spacing: -0.5px; }
+.site-tag { font-size: 11px; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; }
+.hero { margin-bottom: 48px; }
+.hero h1 { font-family: var(--serif); font-size: clamp(34px, 5vw, 52px); font-weight: 300; line-height: 1.1; letter-spacing: -1px; color: var(--ink); margin-bottom: 14px; }
+.hero p { font-size: 14px; color: var(--ink2); max-width: 520px; line-height: 1.8; }
+.section-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.paradigm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin-bottom: 40px; }
+.paradigm-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px; cursor: pointer; transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s; position: relative; overflow: hidden; }
+.paradigm-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--card-accent, var(--accent)); opacity: 0; transition: opacity 0.2s; }
+.paradigm-card:hover { border-color: rgba(26,24,20,0.25); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,24,20,0.08); }
+.paradigm-card:hover::before { opacity: 1; }
+.card-icon { width: 42px; height: 42px; background: var(--surface2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 19px; margin-bottom: 14px; border: 1px solid var(--border); }
+.card-title { font-family: var(--serif); font-size: 19px; font-weight: 400; margin-bottom: 5px; color: var(--ink); }
+.card-desc { font-size: 12px; color: var(--ink2); line-height: 1.7; margin-bottom: 18px; }
+.card-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.meta-pill { font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: var(--surface2); color: var(--ink3); border: 1px solid var(--border); }
+.card-arrow { position: absolute; bottom: 26px; right: 26px; font-size: 16px; color: var(--ink3); transition: transform 0.2s, color 0.2s; }
+.paradigm-card:hover .card-arrow { transform: translate(3px,-3px); color: var(--accent); }
+.info-strip { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 22px; display: flex; gap: 22px; flex-wrap: wrap; align-items: center; }
+.info-item { font-size: 12px; color: var(--ink2); }
+.info-item strong { color: var(--accent); font-weight: 500; }
+
+/* SHELL */
+#paradigm-shell { display: none; min-height: 100vh; flex-direction: column; }
+.p-nav { display: flex; align-items: center; gap: 16px; padding: 14px 28px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.back-btn { font-family: var(--mono); font-size: 12px; color: var(--ink2); cursor: pointer; background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 12px; transition: all 0.15s; }
+.back-btn:hover { background: var(--surface2); color: var(--ink); }
+.p-nav-title { font-family: var(--serif); font-size: 16px; font-weight: 400; color: var(--ink); }
+.p-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 24px; }
+
+/* TASK SHARED */
+.task-wrap { width: 100%; max-width: 720px; text-align: center; }
+.task-phase { display: none; flex-direction: column; align-items: center; gap: 20px; }
+.task-phase.active { display: flex; }
+.phase-title { font-family: var(--serif); font-size: 26px; font-weight: 300; color: var(--ink); }
+.phase-sub { font-size: 13px; color: var(--ink2); line-height: 1.85; max-width: 500px; }
+.phase-sub kbd { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-family: var(--mono); font-size: 12px; }
+.start-btn, .retry-btn { font-family: var(--mono); font-size: 13px; letter-spacing: 0.04em; padding: 11px 26px; border-radius: 8px; border: 1.5px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; transition: all 0.15s; }
+.start-btn:hover, .retry-btn:hover { background: #234830; border-color: #234830; }
+.progress-bar-wrap { width: 100%; max-width: 400px; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--accent2); border-radius: 2px; transition: width 0.3s ease; }
+.trial-count { font-size: 11px; color: var(--ink3); letter-spacing: 0.06em; }
+.feedback-flash { font-size: 13px; font-weight: 500; letter-spacing: 0.08em; min-height: 20px; opacity: 0; transition: opacity 0.1s; }
+.feedback-flash.show { opacity: 1; }
+.feedback-flash.correct { color: var(--accent2); }
+.feedback-flash.wrong { color: #c0392b; }
+
+/* STROOP */
+#stroop-stimulus { font-family: var(--serif); font-size: 68px; font-weight: 600; line-height: 1; padding: 36px 0; min-height: 150px; display: flex; align-items: center; justify-content: center; letter-spacing: -2px; }
+.stroop-keys { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; width: 100%; max-width: 460px; }
+.key-btn { font-family: var(--mono); font-size: 13px; font-weight: 500; padding: 13px 8px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.1s; letter-spacing: 0.04em; }
+.key-btn:hover { transform: scale(1.04); border-color: rgba(26,24,20,0.3); }
+.key-btn:active { transform: scale(0.97); }
+.key-btn[data-color="red"] { color: #c0392b; }
+.key-btn[data-color="blue"] { color: #2765b3; }
+.key-btn[data-color="green"] { color: #1e7c3a; }
+.key-btn[data-color="yellow"] { color: #b07d00; }
+
+/* POSNER SHARED */
+.posner-row { display: flex; align-items: center; gap: 28px; justify-content: center; }
+.posner-box { width: 96px; height: 96px; border: 2px solid var(--border); border-radius: 10px; background: var(--surface); display: flex; align-items: center; justify-content: center; transition: border-color 0.08s, background 0.08s; cursor: pointer; }
+.posner-box.cued { border-color: var(--accent2); background: var(--accent-light); }
+.posner-box.cued-exo { border-color: #c0392b; background: #fde8d4; }
+.posner-box .target-star { display: none; font-size: 38px; color: var(--ink); }
+.posner-box .target-star.visible { display: block; animation: popIn 0.1s ease-out; }
+@keyframes popIn { from { transform: scale(0.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.fixation-cross { font-family: var(--serif); font-size: 36px; color: var(--ink3); width: 56px; text-align: center; user-select: none; }
+.posner-arrow-cue { font-size: 36px; color: var(--accent); min-height: 44px; transition: opacity 0.05s; }
+.posner-instruction-small { font-size: 12px; color: var(--ink3); letter-spacing: 0.04em; }
+.posner-response-hint { font-size: 12px; color: var(--ink3); margin-top: 20px; letter-spacing: 0.04em; }
+
+/* VISUAL SEARCH */
+#vs-arena { width: 100%; max-width: 640px; position: relative; }
+.vs-grid { display: grid; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; gap: 10px; margin: 0 auto; }
+.vs-item { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
+.vs-item svg { display: block; }
+.vs-resp-row { display: flex; gap: 14px; justify-content: center; margin-top: 8px; }
+.vs-resp-btn { font-family: var(--mono); font-size: 13px; padding: 10px 24px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface); cursor: pointer; transition: all 0.12s; }
+.vs-resp-btn:hover { border-color: rgba(26,24,20,0.3); background: var(--surface2); }
+.vs-resp-btn.present { border-color: var(--accent); color: var(--accent); }
+.vs-resp-btn.absent { border-color: var(--warn); color: var(--warn); }
+.vs-condition-label { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink3); }
+
+/* RESULTS SHARED */
+.results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px,1fr)); gap: 10px; width: 100%; margin: 6px 0; }
+.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 10px; text-align: center; }
+.result-val { font-family: var(--serif); font-size: 26px; font-weight: 300; color: var(--ink); line-height: 1.1; }
+.result-label { font-size: 10px; color: var(--ink3); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 3px; }
+.results-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+.results-table th { font-weight: 500; color: var(--ink3); letter-spacing: 0.06em; text-transform: uppercase; font-size: 10px; padding: 7px 9px; border-bottom: 1px solid var(--border); }
+.results-table td { padding: 7px 9px; border-bottom: 1px solid var(--border2); color: var(--ink2); }
+.results-table tr:last-child td { border-bottom: none; }
+.results-table td.correct-mark { color: var(--accent2); font-weight: 500; }
+.results-table td.wrong-mark { color: #c0392b; font-weight: 500; }
+.condition-badge { display: inline-block; font-size: 10px; padding: 2px 6px; border-radius: 4px; letter-spacing: 0.04em; }
+.badge-congruent, .badge-valid { background: var(--accent-light); color: var(--accent); }
+.badge-incongruent, .badge-invalid { background: var(--warn-light); color: var(--warn); }
+.badge-neutral, .badge-feature, .badge-absent { background: var(--surface2); color: var(--ink3); }
+.badge-conjunction, .badge-present { background: var(--blue-light); color: var(--blue); }
+.results-chart-wrap { width: 100%; position: relative; height: 200px; }
+.results-scroll { width: 100%; max-height: 260px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.insight-box { background: var(--accent-light); border: 1px solid rgba(45,90,61,0.2); border-radius: 10px; padding: 14px 18px; text-align: left; width: 100%; }
+.insight-box h4 { font-family: var(--serif); font-size: 14px; font-weight: 400; color: var(--accent); margin-bottom: 5px; }
+.insight-box p { font-size: 12px; color: var(--accent); line-height: 1.75; opacity: 0.88; }
+.download-btn { font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em; padding: 9px 18px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface); color: var(--ink2); cursor: pointer; transition: all 0.15s; }
+.download-btn:hover { background: var(--surface2); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- HUB -->
+<div id="hub">
+  <header class="site-header">
+    <span class="site-logo">MindLab</span>
+    <span class="site-tag">Psychology Paradigms</span>
+  </header>
+  <section class="hero">
+    <h1>Run classic experiments<br>on yourself.</h1>
+    <p>Interactive cognitive psychology paradigms. Complete each task and explore your own reaction time data — the same experiments that shaped the science.</p>
+  </section>
+
+  <div class="section-label">Attention — Interference</div>
+  <div class="paradigm-grid" style="margin-bottom:32px">
+    <div class="paradigm-card" style="--card-accent:#2d5a3d" onclick="launchParadigm('stroop')">
+      <div class="card-icon">🎨</div>
+      <div class="card-title">Stroop Task</div>
+      <div class="card-desc">Name the ink colour of a word that may spell a different colour. Demonstrates automatic processing and attentional interference.</div>
+      <div class="card-meta"><span class="meta-pill">~3 min</span><span class="meta-pill">40 trials</span><span class="meta-pill">Interference</span></div>
+      <span class="card-arrow">↗</span>
+    </div>
+  </div>
+
+  <div class="section-label">Spatial Attention — Posner Cueing</div>
+  <div class="paradigm-grid" style="margin-bottom:32px">
+    <div class="paradigm-card" style="--card-accent:#1a4a8a" onclick="launchParadigm('posner-endo')">
+      <div class="card-icon">→</div>
+      <div class="card-title">Posner — Endogenous</div>
+      <div class="card-desc">A central arrow cue points left or right and is valid 80% of the time. You must use this symbolic cue to direct voluntary attention before the target appears.</div>
+      <div class="card-meta"><span class="meta-pill">~4 min</span><span class="meta-pill">48 trials</span><span class="meta-pill">Voluntary</span><span class="meta-pill">SOA 400ms</span></div>
+      <span class="card-arrow">↗</span>
+    </div>
+    <div class="paradigm-card" style="--card-accent:#8b3a00" onclick="launchParadigm('posner-exo')">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">Posner — Exogenous</div>
+      <div class="card-desc">A brief peripheral flash draws reflexive attention. The cue is only valid 50% of the time, so it cannot be predicted — capturing attention automatically.</div>
+      <div class="card-meta"><span class="meta-pill">~4 min</span><span class="meta-pill">48 trials</span><span class="meta-pill">Reflexive</span><span class="meta-pill">SOA 100ms</span></div>
+      <span class="card-arrow">↗</span>
+    </div>
+  </div>
+
+  <div class="section-label">Visual Search — Feature Integration Theory</div>
+  <div class="paradigm-grid" style="margin-bottom:40px">
+    <div class="paradigm-card" style="--card-accent:#4a2d8a" onclick="launchParadigm('visual-search')">
+      <div class="card-icon">🔍</div>
+      <div class="card-title">Visual Search</div>
+      <div class="card-desc">Search for a target among distractors. Feature searches (one unique property) are effortless; conjunction searches (two combined properties) require serial attention. Treisman's FIT.</div>
+      <div class="card-meta"><span class="meta-pill">~5 min</span><span class="meta-pill">64 trials</span><span class="meta-pill">Feature vs Conjunction</span></div>
+      <span class="card-arrow">↗</span>
+    </div>
+  </div>
+
+  <div class="info-strip">
+    <div class="info-item">⌨️ Keyboard &amp; mouse supported</div>
+    <div class="info-item"><strong>Data stays on your device</strong> — nothing uploaded</div>
+    <div class="info-item">📥 Download CSV after each task</div>
+  </div>
+</div>
+
+<!-- SHELL -->
+<div id="paradigm-shell">
+  <nav class="p-nav">
+    <button class="back-btn" onclick="goHome()">← Back to MindLab</button>
+    <span class="p-nav-title" id="p-nav-title"></span>
+  </nav>
+  <div class="p-content">
+    <div class="task-wrap" id="task-wrap"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ===== NAVIGATION =====
+function launchParadigm(name) {
+  document.getElementById('hub').style.display = 'none';
+  const shell = document.getElementById('paradigm-shell');
+  shell.style.display = 'flex';
+  if (name === 'stroop') initStroop();
+  else if (name === 'posner-endo') initPosner('endo');
+  else if (name === 'posner-exo') initPosner('exo');
+  else if (name === 'visual-search') initVisualSearch();
+}
+
+function goHome() {
+  document.getElementById('hub').style.display = 'block';
+  document.getElementById('paradigm-shell').style.display = 'none';
+  document.getElementById('task-wrap').innerHTML = '';
+  if (window._activeChart) { try { window._activeChart.destroy(); } catch(e){} window._activeChart = null; }
+  if (window._activeChart2) { try { window._activeChart2.destroy(); } catch(e){} window._activeChart2 = null; }
+}
+
+function phase(id) {
+  document.querySelectorAll('.task-phase').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function getMean(arr) {
+  if (!arr.length) return 0;
+  return Math.round(arr.reduce((s,v)=>s+v,0)/arr.length);
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = filename;
+  a.click();
+}
+
+// ===== STROOP =====
+function initStroop() {
+  document.getElementById('p-nav-title').textContent = 'Stroop Task';
+  const COLORS = ['red','blue','green','yellow'];
+  const COLOR_HEX = { red:'#c0392b', blue:'#2765b3', green:'#1e7c3a', yellow:'#b07d00' };
+  let trials = [], idx = 0, tStart = 0, results = [], waiting = false;
+
+  function buildTrials() {
+    const t = [];
+    for (let c = 0; c < 4; c++) {
+      for (let i = 0; i < 10; i++) {
+        const word = COLORS[c];
+        let ink;
+        if (i < 5) { ink = COLORS[c]; }
+        else { do { ink = COLORS[Math.floor(Math.random()*4)]; } while (ink === word); }
+        t.push({ word, inkColor: ink, congruent: word === ink });
+      }
+    }
+    return t.sort(()=>Math.random()-0.5);
+  }
+
+  document.getElementById('task-wrap').innerHTML = `
+    <div class="task-phase active" id="s-intro">
+      <div class="phase-title">Stroop Task</div>
+      <div class="phase-sub">A colour word appears printed in a possibly different ink colour.<br><br>
+        Respond to the <strong>INK COLOUR</strong> — not the word. Use the buttons or keys <kbd>R</kbd> <kbd>B</kbd> <kbd>G</kbd> <kbd>Y</kbd>.<br><br>
+        Respond as quickly and accurately as you can.</div>
+      <button class="start-btn" onclick="stroopStart()">Begin — 40 trials</button>
+    </div>
+    <div class="task-phase" id="s-task">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="s-prog" style="width:0%"></div></div>
+      <div class="trial-count" id="s-count">Trial 1 of 40</div>
+      <div id="stroop-stimulus">+</div>
+      <div class="stroop-keys">
+        <button class="key-btn" data-color="red" onclick="stroopRespond('red')">RED<br><span style="font-size:10px;opacity:.5">R</span></button>
+        <button class="key-btn" data-color="blue" onclick="stroopRespond('blue')">BLUE<br><span style="font-size:10px;opacity:.5">B</span></button>
+        <button class="key-btn" data-color="green" onclick="stroopRespond('green')">GREEN<br><span style="font-size:10px;opacity:.5">G</span></button>
+        <button class="key-btn" data-color="yellow" onclick="stroopRespond('yellow')">YELLOW<br><span style="font-size:10px;opacity:.5">Y</span></button>
+      </div>
+      <div class="feedback-flash" id="s-fb"></div>
+    </div>
+    <div class="task-phase" id="s-results">
+      <div class="phase-title">Your Results</div>
+      <div class="results-grid" id="s-summary"></div>
+      <div class="results-chart-wrap"><canvas id="s-chart" role="img" aria-label="Mean RT by colour and condition"></canvas></div>
+      <div class="insight-box" id="s-insight"></div>
+      <div class="results-scroll"><table class="results-table" id="s-table"></table></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="download-btn" onclick="stroopDownload()">↓ Download CSV</button>
+        <button class="retry-btn" onclick="stroopStart()">Try again</button>
+      </div>
+    </div>`;
+
+  window.stroopStart = function() {
+    trials = buildTrials(); idx = 0; results = [];
+    phase('s-task'); stroopNext();
+  };
+
+  window.stroopNext = function() {
+    if (idx >= trials.length) { stroopFinish(); return; }
+    waiting = true;
+    const stim = document.getElementById('stroop-stimulus');
+    stim.textContent = '+'; stim.style.color = 'var(--ink3)';
+    document.getElementById('s-count').textContent = `Trial ${idx+1} of ${trials.length}`;
+    document.getElementById('s-prog').style.width = (idx/trials.length*100)+'%';
+    document.getElementById('s-fb').classList.remove('show');
+    setTimeout(() => {
+      const t = trials[idx];
+      stim.textContent = t.word.toUpperCase();
+      stim.style.color = COLOR_HEX[t.inkColor];
+      tStart = performance.now();
+    }, 400 + Math.random()*400);
+  };
+
+  window.stroopRespond = function(color) {
+    if (!waiting) return;
+    const rt = performance.now() - tStart;
+    if (rt < 150) return;
+    waiting = false;
+    const t = trials[idx];
+    const correct = color === t.inkColor;
+    results.push({ trial:idx+1, word:t.word, inkColor:t.inkColor, response:color, correct, rt:Math.round(rt), congruent:t.congruent });
+    const fb = document.getElementById('s-fb');
+    fb.textContent = correct ? '✓ correct' : '✗ wrong';
+    fb.className = 'feedback-flash show ' + (correct?'correct':'wrong');
+    idx++;
+    setTimeout(stroopNext, 350);
+  };
+
+  document.addEventListener('keydown', function sk(e) {
+    const map = {r:'red',b:'blue',g:'green',y:'yellow'};
+    const c = map[e.key.toLowerCase()];
+    if (c && document.getElementById('s-task')?.classList.contains('active')) stroopRespond(c);
+    if (!document.getElementById('s-task')) document.removeEventListener('keydown', sk);
+  });
+
+  function stroopFinish() {
+    const cong = results.filter(r=>r.congruent&&r.correct);
+    const incong = results.filter(r=>!r.congruent&&r.correct);
+    const congRT = getMean(cong.map(r=>r.rt));
+    const incongRT = getMean(incong.map(r=>r.rt));
+    const acc = Math.round(results.filter(r=>r.correct).length/results.length*100);
+    const effect = incongRT - congRT;
+
+    document.getElementById('s-summary').innerHTML = `
+      <div class="result-card"><div class="result-val">${congRT}ms</div><div class="result-label">Congruent RT</div></div>
+      <div class="result-card"><div class="result-val">${incongRT}ms</div><div class="result-label">Incongruent RT</div></div>
+      <div class="result-card"><div class="result-val">${effect>0?'+':''}${effect}ms</div><div class="result-label">Stroop Effect</div></div>
+      <div class="result-card"><div class="result-val">${acc}%</div><div class="result-label">Accuracy</div></div>`;
+
+    document.getElementById('s-insight').innerHTML = `<h4>What does this mean?</h4>
+      <p>Your incongruent trials were ${effect>0?effect+'ms slower':'not notably slower'} than congruent ones.
+      ${effect>0?'This Stroop effect reflects automatic reading interfering with colour naming — a hallmark of automatic vs. controlled processing.':'A small effect can occur with strong attentional control or extensive colour-naming practice.'}
+      Typical laboratory Stroop effects are 50–150ms.</p>`;
+
+    const byColor = {};
+    COLORS.forEach(c => {
+      const cr = results.filter(r=>r.inkColor===c&&r.congruent&&r.correct);
+      const ir = results.filter(r=>r.inkColor===c&&!r.congruent&&r.correct);
+      byColor[c] = { cong: getMean(cr.map(r=>r.rt)), incong: getMean(ir.map(r=>r.rt)) };
+    });
+    if (window._activeChart) window._activeChart.destroy();
+    window._activeChart = new Chart(document.getElementById('s-chart'), {
+      type:'bar',
+      data:{ labels:COLORS.map(c=>c[0].toUpperCase()+c.slice(1)),
+        datasets:[
+          {label:'Congruent',data:COLORS.map(c=>byColor[c].cong),backgroundColor:'#d6ead9',borderColor:'#2d5a3d',borderWidth:1.5},
+          {label:'Incongruent',data:COLORS.map(c=>byColor[c].incong),backgroundColor:'#fde8d4',borderColor:'#8b3a00',borderWidth:1.5}
+        ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{font:{family:'DM Mono'},boxWidth:12}}},
+        scales:{y:{title:{display:true,text:'Mean RT (ms)',font:{family:'DM Mono',size:11}},ticks:{font:{family:'DM Mono',size:11}}},x:{ticks:{font:{family:'DM Mono',size:11}}}}}
+    });
+
+    document.getElementById('s-table').innerHTML =
+      `<thead><tr><th>#</th><th>Word</th><th>Ink</th><th>Response</th><th>Condition</th><th>RT</th><th>✓</th></tr></thead>
+      <tbody>${results.map(r=>`<tr>
+        <td>${r.trial}</td><td>${r.word}</td>
+        <td style="color:${COLOR_HEX[r.inkColor]};font-weight:500">${r.inkColor}</td>
+        <td>${r.response}</td>
+        <td><span class="condition-badge badge-${r.congruent?'congruent':'incongruent'}">${r.congruent?'congruent':'incongruent'}</span></td>
+        <td>${r.rt}ms</td><td class="${r.correct?'correct-mark':'wrong-mark'}">${r.correct?'✓':'✗'}</td>
+      </tr>`).join('')}</tbody>`;
+    phase('s-results');
+  }
+
+  window.stroopDownload = function() {
+    const rows=[['trial','word','inkColor','response','condition','rt_ms','correct']];
+    results.forEach(r=>rows.push([r.trial,r.word,r.inkColor,r.response,r.congruent?'congruent':'incongruent',r.rt,r.correct?1:0]));
+    downloadCSV(rows,'stroop_results.csv');
+  };
+}
+
+// ===== POSNER (ENDO + EXO) =====
+function initPosner(mode) {
+  // mode: 'endo' = central arrow cue, voluntary, 80% valid, SOA 400ms
+  //       'exo'  = peripheral flash cue, reflexive, 50% valid, SOA 100ms
+  // Both include a neutral baseline: endo = double-headed arrow (↔), exo = both boxes flash
+  const isEndo = mode === 'endo';
+  const SOA = isEndo ? 400 : 100;
+  const TITLE = isEndo ? 'Posner Cueing — Endogenous' : 'Posner Cueing — Exogenous';
+  // Trial counts per condition: 16 valid (8L+8R), 8 invalid (4L+4R), 12 neutral (6L+6R target)
+  // Total = 36 trials — clean, balanced, not too long
+  const SIDES = ['left','right'];
+  document.getElementById('p-nav-title').textContent = TITLE;
+
+  let trials = [], idx = 0, tStart = 0, results = [], timer = null, awaitingResponse = false;
+
+  function buildTrials() {
+    const t = [];
+    SIDES.forEach(side => {
+      const other = side === 'left' ? 'right' : 'left';
+      // Valid: cue correctly predicts target side
+      for (let i = 0; i < 8; i++) t.push({cueType:'valid', cueSide:side, targetSide:side});
+      // Invalid: cue misdirects
+      for (let i = 0; i < 4; i++) t.push({cueType:'invalid', cueSide:other, targetSide:side});
+      // Neutral: uninformative cue (no directional information), target appears on this side
+      for (let i = 0; i < 6; i++) t.push({cueType:'neutral', cueSide:'both', targetSide:side});
+    });
+    return t.sort(() => Math.random() - 0.5);
+  }
+
+  const neutralCueDesc = isEndo
+    ? 'On some trials a <strong>double-headed arrow ↔</strong> will appear instead — this is a neutral cue giving no location information, used as a baseline.'
+    : 'On some trials <strong>both boxes</strong> will flash simultaneously — this neutral cue gives no location information and serves as a baseline.';
+
+  const introText = isEndo
+    ? `A central arrow (← or →) will briefly appear at the fixation cross. It correctly predicts the target location <strong>80% of the time</strong> — use it to voluntarily direct your attention.<br><br>${neutralCueDesc}<br><br>Keep your eyes on the central <strong>+</strong>. When the ★ appears, press <kbd>← Left</kbd> or <kbd>→ Right</kbd> as quickly as possible.`
+    : `A brief peripheral flash will appear in one of the two boxes. It is valid <strong>only 50% of the time</strong> — attention is captured automatically, not by prediction.<br><br>${neutralCueDesc}<br><br>Keep your eyes on the central <strong>+</strong>. When the ★ appears, press <kbd>← Left</kbd> or <kbd>→ Right</kbd> as quickly as possible.`;
+
+  const totalTrials = 36;
+  document.getElementById('task-wrap').innerHTML = `
+    <div class="task-phase active" id="p-intro">
+      <div class="phase-title">${TITLE}</div>
+      <div class="phase-sub">${introText}</div>
+      <button class="start-btn" onclick="posnerStart()">Begin — ${totalTrials} trials</button>
+    </div>
+    <div class="task-phase" id="p-task">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="p-prog" style="width:0%"></div></div>
+      <div class="trial-count" id="p-count">Trial 1 of ${totalTrials}</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;padding:16px 0">
+        <div class="posner-instruction-small">Keep eyes on the +</div>
+        <div style="height:10px"></div>
+        ${isEndo ? '<div class="posner-arrow-cue" id="p-arrow">&nbsp;</div>' : '<div style="height:44px"></div>'}
+        <div class="posner-row">
+          <div class="posner-box" id="p-left" onclick="posnerRespond(\'left\')"><span class="target-star" id="p-star-left">★</span></div>
+          <div class="fixation-cross">+</div>
+          <div class="posner-box" id="p-right" onclick="posnerRespond(\'right\')"><span class="target-star" id="p-star-right">★</span></div>
+        </div>
+        <div class="posner-response-hint">← Left arrow &nbsp;|&nbsp; Right arrow →</div>
+      </div>
+      <div class="feedback-flash" id="p-fb"></div>
+    </div>
+    <div class="task-phase" id="p-results">
+      <div class="phase-title">Your Results</div>
+      <div class="results-grid" id="p-summary"></div>
+      <div class="results-chart-wrap"><canvas id="p-chart" role="img" aria-label="Mean reaction time by cue type"></canvas></div>
+      <div class="insight-box" id="p-insight"></div>
+      <div class="results-scroll"><table class="results-table" id="p-table"></table></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="download-btn" onclick="posnerDownload()">↓ Download CSV</button>
+        <button class="retry-btn" onclick="posnerStart()">Try again</button>
+      </div>
+    </div>`;
+
+  window.posnerStart = function() {
+    trials = buildTrials(); idx = 0; results = [];
+    phase('p-task'); posnerNext();
+  };
+
+  function resetBoxes() {
+    ['left','right'].forEach(s => {
+      const b = document.getElementById('p-'+s);
+      if (b) b.classList.remove('cued','cued-exo');
+      const st = document.getElementById('p-star-'+s);
+      if (st) st.classList.remove('visible');
+    });
+    if (isEndo) {
+      const arr = document.getElementById('p-arrow');
+      if (arr) arr.innerHTML = '&nbsp;';
+    }
+  }
+
+  function showCue(t) {
+    if (isEndo) {
+      const arr = document.getElementById('p-arrow');
+      if (!arr) return;
+      if (t.cueType === 'neutral') arr.textContent = '↔';
+      else arr.textContent = t.cueSide === 'left' ? '←' : '→';
+    } else {
+      // exo: flash peripheral box(es)
+      if (t.cueType === 'neutral') {
+        document.getElementById('p-left').classList.add('cued-exo');
+        document.getElementById('p-right').classList.add('cued-exo');
+      } else {
+        document.getElementById('p-'+t.cueSide).classList.add('cued-exo');
+      }
+    }
+  }
+
+  window.posnerNext = function() {
+    if (idx >= trials.length) { posnerFinish(); return; }
+    resetBoxes();
+    awaitingResponse = false;
+    clearTimeout(timer);
+    const t = trials[idx];
+    document.getElementById('p-count').textContent = `Trial ${idx+1} of ${trials.length}`;
+    document.getElementById('p-prog').style.width = (idx/trials.length*100)+'%';
+    document.getElementById('p-fb').classList.remove('show');
+
+    const fixWait = 600 + Math.random()*500;
+    timer = setTimeout(() => {
+      showCue(t);
+      timer = setTimeout(() => {
+        resetBoxes();
+        timer = setTimeout(() => {
+          const star = document.getElementById('p-star-'+t.targetSide);
+          if (star) star.classList.add('visible');
+          tStart = performance.now();
+          awaitingResponse = true;
+          timer = setTimeout(() => {
+            if (!awaitingResponse) return;
+            awaitingResponse = false;
+            results.push({trial:idx+1,cueType:t.cueType,cueSide:t.cueSide,targetSide:t.targetSide,response:'none',correct:false,rt:null});
+            idx++;
+            const fb = document.getElementById('p-fb');
+            fb.textContent = '⏱ too slow'; fb.className = 'feedback-flash show wrong';
+            resetBoxes();
+            setTimeout(posnerNext, 500);
+          }, 2000);
+        }, 50);
+      }, SOA);
+    }, fixWait);
+  };
+
+  window.posnerRespond = function(side) {
+    if (!awaitingResponse) return;
+    const rt = performance.now() - tStart;
+    if (rt < 80) return;
+    awaitingResponse = false;
+    clearTimeout(timer);
+    resetBoxes();
+    const t = trials[idx];
+    const correct = side === t.targetSide;
+    results.push({trial:idx+1,cueType:t.cueType,cueSide:t.cueSide,targetSide:t.targetSide,response:side,correct,rt:Math.round(rt)});
+    const fb = document.getElementById('p-fb');
+    fb.textContent = correct ? '✓ correct' : '✗ wrong';
+    fb.className = 'feedback-flash show '+(correct?'correct':'wrong');
+    idx++;
+    setTimeout(posnerNext, 380);
+  };
+
+  document.addEventListener('keydown', function pk(e) {
+    if (!document.getElementById('p-task')?.classList.contains('active')) return;
+    if (e.key==='ArrowLeft') posnerRespond('left');
+    else if (e.key==='ArrowRight') posnerRespond('right');
+    if (!document.getElementById('p-task')) document.removeEventListener('keydown',pk);
+  });
+
+  function posnerFinish() {
+    const byType = cue => results.filter(r=>r.cueType===cue&&r.correct&&r.rt);
+    const validRT   = getMean(byType('valid').map(r=>r.rt));
+    const invalidRT = getMean(byType('invalid').map(r=>r.rt));
+    const neutralRT = getMean(byType('neutral').map(r=>r.rt));
+    const cueingEffect  = invalidRT - validRT;      // full cueing range
+    const benefitVsBase = neutralRT - validRT;      // how much valid cue helped vs baseline
+    const costVsBase    = invalidRT - neutralRT;    // how much invalid cue hurt vs baseline
+    const acc = Math.round(results.filter(r=>r.correct).length/results.length*100);
+
+    document.getElementById('p-summary').innerHTML = `
+      <div class="result-card"><div class="result-val">${validRT}ms</div><div class="result-label">Valid RT</div></div>
+      <div class="result-card"><div class="result-val">${neutralRT}ms</div><div class="result-label">Neutral RT</div></div>
+      <div class="result-card"><div class="result-val">${invalidRT}ms</div><div class="result-label">Invalid RT</div></div>
+      <div class="result-card"><div class="result-val">${benefitVsBase>0?'-':''}${Math.abs(benefitVsBase)}ms</div><div class="result-label">Cue benefit</div></div>
+      <div class="result-card"><div class="result-val">${costVsBase>0?'+':''}${costVsBase}ms</div><div class="result-label">Cue cost</div></div>
+      <div class="result-card"><div class="result-val">${acc}%</div><div class="result-label">Accuracy</div></div>`;
+
+    const endoInsight = `Endogenous cueing (↔ neutral baseline, ${SOA}ms SOA). The neutral ↔ cue provides a true baseline — attention is neither directed nor misdirected. Comparing valid vs neutral shows the <em>benefit</em> of correctly orienting attention; invalid vs neutral shows the <em>cost</em> of being misled. With voluntary attention, benefits and costs are typically similar in size.`;
+    const exoInsight  = `Exogenous cueing (both-boxes neutral baseline, ${SOA}ms SOA). The bilateral flash cue provides a true baseline — both locations are equally cued, so attention is not lateralised. Benefit (neutral − valid) and cost (invalid − neutral) can be separated. Exogenous attention often shows larger costs than benefits, and the effect diminishes quickly after ~300ms.`;
+
+    document.getElementById('p-insight').innerHTML = `<h4>What does this mean?</h4>
+      <p>${isEndo?endoInsight:exoInsight}<br><br>
+      Your cue benefit: ${Math.abs(benefitVsBase)}ms ${benefitVsBase>0?'(valid faster than neutral)':'(neutral was not slower — weak or absent benefit)'}.
+      Your cue cost: ${costVsBase}ms ${costVsBase>0?'(invalid slower than neutral)':'(neutral was not faster — weak or absent cost)'}.</p>`;
+
+    if (window._activeChart) window._activeChart.destroy();
+    window._activeChart = new Chart(document.getElementById('p-chart'), {
+      type:'bar',
+      data:{
+        labels:['Valid','Neutral','Invalid'],
+        datasets:[{
+          label:'Mean RT (ms)',
+          data:[validRT, neutralRT, invalidRT],
+          backgroundColor:['#d6ead9','#e8e4da','#fde8d4'],
+          borderColor:['#2d5a3d','#9a9488','#8b3a00'],
+          borderWidth:1.5
+        }]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{
+          y:{title:{display:true,text:'Mean RT (ms)',font:{family:'DM Mono',size:11}},ticks:{font:{family:'DM Mono',size:11}}},
+          x:{ticks:{font:{family:'DM Mono',size:11}}}
+        }
+      }
+    });
+
+    document.getElementById('p-table').innerHTML =
+      `<thead><tr><th>#</th><th>Cue type</th><th>Cue side</th><th>Target</th><th>Response</th><th>RT</th><th>✓</th></tr></thead>
+      <tbody>${results.map(r=>`<tr>
+        <td>${r.trial}</td>
+        <td><span class="condition-badge badge-${r.cueType}">${r.cueType}</span></td>
+        <td>${r.cueSide}</td><td>${r.targetSide}</td><td>${r.response}</td>
+        <td>${r.rt!=null?r.rt+'ms':'—'}</td>
+        <td class="${r.correct?'correct-mark':'wrong-mark'}">${r.correct?'✓':'✗'}</td>
+      </tr>`).join('')}</tbody>`;
+    phase('p-results');
+  }
+
+  window.posnerDownload = function() {
+    const rows=[['trial','mode','cueType','cueSide','targetSide','response','rt_ms','correct']];
+    results.forEach(r=>rows.push([r.trial,mode,r.cueType,r.cueSide,r.targetSide,r.response,r.rt??'',r.correct?1:0]));
+    downloadCSV(rows,`posner_${mode}_results.csv`);
+  };
+}
+
+// ===== VISUAL SEARCH (Feature Integration Theory) =====
+function initVisualSearch() {
+  document.getElementById('p-nav-title').textContent = 'Visual Search — Feature Integration Theory';
+
+  // Conditions:
+  // Feature search: target = red circle, distractors = blue circles (target pops out by colour)
+  // Conjunction search: target = red circle, distractors = blue circles + red squares
+  // Set sizes: 4, 8, 16
+  // Target present/absent (50/50)
+
+  const SET_SIZES = [4, 8, 16];
+  const REPS = 2; // reps per condition cell (2 × 3 set sizes × 2 presence × 2 conditions = 24 * ... = 64 trials total)
+  let trials = [], idx = 0, tStart = 0, results = [], awaitingResponse = false;
+
+  function buildTrials() {
+    const t = [];
+    ['feature','conjunction'].forEach(cond => {
+      SET_SIZES.forEach(n => {
+        for (let r=0; r<REPS; r++) {
+          t.push({condition:cond, setSize:n, targetPresent:true});
+          t.push({condition:cond, setSize:n, targetPresent:false});
+        }
+      });
+    });
+    return t.sort(()=>Math.random()-0.5);
+  }
+
+  // SVG item generators
+  function makeCircle(color, size=32) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="${color}" stroke="none"/></svg>`;
+  }
+  function makeSquare(color, size=32) {
+    return `<svg width="${size}" height="${size}" viewBox="0 0 32 32"><rect x="3" y="3" width="26" height="26" rx="3" fill="${color}" stroke="none"/></svg>`;
+  }
+
+  function buildDisplay(trial) {
+    const n = trial.setSize;
+    // Target: red circle
+    // Feature distractors: blue circles
+    // Conjunction distractors: blue circles + red squares (split roughly evenly)
+    const items = [];
+    if (trial.targetPresent) {
+      items.push({shape:'circle',color:'#c0392b',isTarget:true});
+    }
+    const nDist = trial.targetPresent ? n - 1 : n;
+    for (let i=0; i<nDist; i++) {
+      if (trial.condition === 'feature') {
+        items.push({shape:'circle',color:'#2765b3',isTarget:false});
+      } else {
+        // Alternate blue circles and red squares
+        if (i % 2 === 0) items.push({shape:'circle',color:'#2765b3',isTarget:false});
+        else items.push({shape:'square',color:'#c0392b',isTarget:false});
+      }
+    }
+    // Shuffle
+    return items.sort(()=>Math.random()-0.5);
+  }
+
+  function renderGrid(items, setSize) {
+    const cols = setSize <= 4 ? 4 : setSize <= 8 ? 4 : 6;
+    const arena = document.getElementById('vs-arena');
+    if (!arena) return;
+    arena.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'vs-grid';
+    grid.style.gridTemplateColumns = `repeat(${cols}, 52px)`;
+    grid.style.maxWidth = (cols * 62 + 40) + 'px';
+    items.forEach(item => {
+      const cell = document.createElement('div');
+      cell.className = 'vs-item';
+      cell.innerHTML = item.shape === 'circle' ? makeCircle(item.color) : makeSquare(item.color);
+      grid.appendChild(cell);
+    });
+    arena.appendChild(grid);
+  }
+
+  document.getElementById('task-wrap').innerHTML = `
+    <div class="task-phase active" id="vs-intro">
+      <div class="phase-title">Visual Search</div>
+      <div class="phase-sub">
+        You will search for a <strong>red circle</strong> among distractors.<br><br>
+        In <strong>feature</strong> trials, distractors are blue circles — the target pops out by colour.<br>
+        In <strong>conjunction</strong> trials, distractors are blue circles <em>and</em> red squares — you must combine colour + shape to find the target.<br><br>
+        Press <kbd>Z</kbd> or click <strong>Present</strong> if you see a red circle. Press <kbd>M</kbd> or click <strong>Absent</strong> if not.
+      </div>
+      <div style="display:flex;gap:20px;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px 0">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--ink3)">
+          <div>${makeCircle('#c0392b',40)}</div>Target — red circle
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--ink3)">
+          <div>${makeCircle('#2765b3',40)}</div>Distractor — blue circle
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;color:var(--ink3)">
+          <div>${makeSquare('#c0392b',40)}</div>Distractor (conjunction only) — red square
+        </div>
+      </div>
+      <button class="start-btn" onclick="vsStart()">Begin — 64 trials</button>
+    </div>
+    <div class="task-phase" id="vs-task">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="vs-prog" style="width:0%"></div></div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:4px">
+        <div class="trial-count" id="vs-count">Trial 1 of 64</div>
+        <div class="vs-condition-label" id="vs-cond-label"></div>
+      </div>
+      <div id="vs-arena"></div>
+      <div class="vs-resp-row">
+        <button class="vs-resp-btn present" onclick="vsRespond(true)">✓ Present <span style="opacity:.5;font-size:10px">Z</span></button>
+        <button class="vs-resp-btn absent" onclick="vsRespond(false)">✗ Absent <span style="opacity:.5;font-size:10px">M</span></button>
+      </div>
+      <div class="feedback-flash" id="vs-fb"></div>
+    </div>
+    <div class="task-phase" id="vs-results">
+      <div class="phase-title">Your Results</div>
+      <div class="results-grid" id="vs-summary"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%">
+        <div>
+          <div style="font-size:11px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Target-present RT by set size</div>
+          <div style="position:relative;height:180px"><canvas id="vs-chart1" role="img" aria-label="RT by set size, target present"></canvas></div>
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px">Target-absent RT by set size</div>
+          <div style="position:relative;height:180px"><canvas id="vs-chart2" role="img" aria-label="RT by set size, target absent"></canvas></div>
+        </div>
+      </div>
+      <div class="insight-box" id="vs-insight"></div>
+      <div class="results-scroll"><table class="results-table" id="vs-table"></table></div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="download-btn" onclick="vsDownload()">↓ Download CSV</button>
+        <button class="retry-btn" onclick="vsStart()">Try again</button>
+      </div>
+    </div>`;
+
+  window.vsStart = function() {
+    trials = buildTrials(); idx = 0; results = [];
+    phase('vs-task'); vsNext();
+  };
+
+  window.vsNext = function() {
+    if (idx >= trials.length) { vsFinish(); return; }
+    awaitingResponse = false;
+    const t = trials[idx];
+    document.getElementById('vs-count').textContent = `Trial ${idx+1} of ${trials.length}`;
+    document.getElementById('vs-prog').style.width = (idx/trials.length*100)+'%';
+    document.getElementById('vs-fb').classList.remove('show');
+    const lbl = document.getElementById('vs-cond-label');
+    if (lbl) { lbl.textContent = t.condition + ' search · n=' + t.setSize; }
+    const items = buildDisplay(t);
+    renderGrid(items, t.setSize);
+    tStart = performance.now();
+    awaitingResponse = true;
+  };
+
+  window.vsRespond = function(responsePresent) {
+    if (!awaitingResponse) return;
+    const rt = performance.now() - tStart;
+    awaitingResponse = false;
+    const t = trials[idx];
+    const correct = responsePresent === t.targetPresent;
+    results.push({trial:idx+1,condition:t.condition,setSize:t.setSize,targetPresent:t.targetPresent,responsePresent,correct,rt:Math.round(rt)});
+    const fb = document.getElementById('vs-fb');
+    fb.textContent = correct ? '✓ correct' : '✗ wrong';
+    fb.className = 'feedback-flash show '+(correct?'correct':'wrong');
+    idx++;
+    setTimeout(vsNext, 400);
+  };
+
+  document.addEventListener('keydown', function vsk(e) {
+    if (!document.getElementById('vs-task')?.classList.contains('active')) return;
+    if (e.key.toLowerCase()==='z') vsRespond(true);
+    else if (e.key.toLowerCase()==='m') vsRespond(false);
+    if (!document.getElementById('vs-task')) document.removeEventListener('keydown',vsk);
+  });
+
+  function vsFinish() {
+    const featAcc = results.filter(r=>r.condition==='feature'&&r.correct).length;
+    const conjAcc = results.filter(r=>r.condition==='conjunction'&&r.correct).length;
+    const featTotal = results.filter(r=>r.condition==='feature').length;
+    const conjTotal = results.filter(r=>r.condition==='conjunction').length;
+    const featMeanRT = getMean(results.filter(r=>r.condition==='feature'&&r.correct).map(r=>r.rt));
+    const conjMeanRT = getMean(results.filter(r=>r.condition==='conjunction'&&r.correct).map(r=>r.rt));
+    const overallAcc = Math.round(results.filter(r=>r.correct).length/results.length*100);
+
+    document.getElementById('vs-summary').innerHTML = `
+      <div class="result-card"><div class="result-val">${featMeanRT}ms</div><div class="result-label">Feature RT</div></div>
+      <div class="result-card"><div class="result-val">${conjMeanRT}ms</div><div class="result-label">Conjunction RT</div></div>
+      <div class="result-card"><div class="result-val">${conjMeanRT-featMeanRT>0?'+':''}${conjMeanRT-featMeanRT}ms</div><div class="result-label">Conj − Feature</div></div>
+      <div class="result-card"><div class="result-val">${overallAcc}%</div><div class="result-label">Accuracy</div></div>`;
+
+    // Build RT x set-size data
+    function rtBySize(cond, present) {
+      return SET_SIZES.map(n => {
+        const subset = results.filter(r=>r.condition===cond&&r.setSize===n&&r.targetPresent===present&&r.correct);
+        return getMean(subset.map(r=>r.rt));
+      });
+    }
+
+    if (window._activeChart) try{window._activeChart.destroy();}catch(e){}
+    if (window._activeChart2) try{window._activeChart2.destroy();}catch(e){}
+
+    const commonOpts = {responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'DM Mono',size:10},boxWidth:10}}},
+      scales:{y:{title:{display:true,text:'Mean RT (ms)',font:{family:'DM Mono',size:10}},ticks:{font:{family:'DM Mono',size:10}}},
+              x:{title:{display:true,text:'Set size',font:{family:'DM Mono',size:10}},ticks:{font:{family:'DM Mono',size:10}}}}};
+
+    window._activeChart = new Chart(document.getElementById('vs-chart1'),{
+      type:'line',
+      data:{labels:SET_SIZES,datasets:[
+        {label:'Feature',data:rtBySize('feature',true),borderColor:'#2d5a3d',backgroundColor:'#d6ead9',pointRadius:4,tension:0.3},
+        {label:'Conjunction',data:rtBySize('conjunction',true),borderColor:'#4a2d8a',backgroundColor:'#e8e0f8',pointRadius:4,tension:0.3}
+      ]},
+      options:{...commonOpts}
+    });
+    window._activeChart2 = new Chart(document.getElementById('vs-chart2'),{
+      type:'line',
+      data:{labels:SET_SIZES,datasets:[
+        {label:'Feature',data:rtBySize('feature',false),borderColor:'#2d5a3d',backgroundColor:'#d6ead9',pointRadius:4,tension:0.3,borderDash:[4,4]},
+        {label:'Conjunction',data:rtBySize('conjunction',false),borderColor:'#4a2d8a',backgroundColor:'#e8e0f8',pointRadius:4,tension:0.3,borderDash:[4,4]}
+      ]},
+      options:{...commonOpts}
+    });
+
+    // Estimate slopes for insight
+    function slope(arr) {
+      if (arr.filter(v=>v>0).length < 2) return 0;
+      const x = SET_SIZES, y = arr;
+      const n = x.length, mx = getMean(x), my = getMean(y.filter(v=>v));
+      let num=0,den=0;
+      x.forEach((xi,i)=>{ if(y[i]>0){num+=(xi-mx)*(y[i]-my);den+=(xi-mx)**2;}});
+      return den ? Math.round(num/den) : 0;
+    }
+    const featSlope = slope(rtBySize('feature',true));
+    const conjSlope = slope(rtBySize('conjunction',true));
+
+    document.getElementById('vs-insight').innerHTML = `<h4>What does this mean?</h4>
+      <p>Feature search RT slope: ~${featSlope}ms/item. Conjunction search RT slope: ~${conjSlope}ms/item.<br>
+      ${Math.abs(conjSlope) > Math.abs(featSlope)+10
+        ? 'Your conjunction search RT increased with set size while feature search did not — a classic pattern predicted by Treisman\'s Feature Integration Theory. Features are registered in parallel across the visual field (pop-out); conjunctions require focused serial attention to bind features together.'
+        : 'Both conditions showed similar slopes. This can happen when set sizes are small (all conditions may be processed quite quickly), or with practice. The key prediction is that conjunction RT should scale more steeply with set size than feature RT.'}
+      Typical lab slopes: feature ~5ms/item; conjunction ~20–40ms/item (present), ~40–80ms/item (absent).</p>`;
+
+    document.getElementById('vs-table').innerHTML =
+      `<thead><tr><th>#</th><th>Condition</th><th>Set size</th><th>Target</th><th>Response</th><th>RT</th><th>✓</th></tr></thead>
+      <tbody>${results.map(r=>`<tr>
+        <td>${r.trial}</td>
+        <td><span class="condition-badge badge-${r.condition}">${r.condition}</span></td>
+        <td>${r.setSize}</td>
+        <td><span class="condition-badge badge-${r.targetPresent?'present':'absent'}">${r.targetPresent?'present':'absent'}</span></td>
+        <td>${r.responsePresent?'present':'absent'}</td>
+        <td>${r.rt}ms</td>
+        <td class="${r.correct?'correct-mark':'wrong-mark'}">${r.correct?'✓':'✗'}</td>
+      </tr>`).join('')}</tbody>`;
+    phase('vs-results');
+  }
+
+  window.vsDownload = function() {
+    const rows=[['trial','condition','setSize','targetPresent','responsePresent','rt_ms','correct']];
+    results.forEach(r=>rows.push([r.trial,r.condition,r.setSize,r.targetPresent?1:0,r.responsePresent?1:0,r.rt,r.correct?1:0]));
+    downloadCSV(rows,'visual_search_results.csv');
+  };
+}
+</script>
+</body>
+</html>
